@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from http import HTTPStatus
@@ -36,11 +37,11 @@ async def get_message(
             nonlocal retrieved_data
             retrieved_data = MessageSchema(**json.loads(message.body))
 
-    await rabbit_client.consume(
-        settings.RETRIEVE_DATA_QUEUE_NAME.substitute(key=key), on_message
+    await asyncio.wait_for(
+        rabbit_client.consume(
+            settings.RETRIEVE_DATA_QUEUE_NAME.substitute(key=key), on_message
+        ),
+        timeout=10,
     )
 
-    if retrieved_data:
-        return retrieved_data
-    else:
-        return None
+    return retrieved_data
