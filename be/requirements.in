@@ -1,3 +1,5 @@
-fastapi
 aio_pika
-aioredis[hiredis]
+fastapi
+uvicorn
+pydantic
+pydantic-settings
