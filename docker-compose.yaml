@@ -1,0 +1,34 @@
+services:
+  rabbit:
+    image: rabbitmq
+    ports:
+        - "5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit_user
+      - RABBITMQ_DEFAULT_PASS=rabbit_password
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis_password
+
+  worker:
+    build:
+      dockerfile: Dockerfile
+      context: worker
+    ports:
+      - "9000:9000"
+    command: >
+      bash -c "wait-for-it -s rabbit:5672 --
+      python main.py"
+
+  be:
+    build:
+      dockerfile: Dockerfile
+      context: be
+    ports:
+      - "8000:8000"
+    command: >
+      bash -c "wait-for-it -s rabbit:5672 --
+      uvicorn main:create_app --host 0.0.0.0 --port 8000"
